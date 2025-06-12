@@ -1,12 +1,5 @@
 // 급식 정보를 화면에 표시하는 메인 모듈
 
-// 모듈 시스템이 지원되지 않는 환경에서는 script 태그로 API 파일을 먼저 불러와야 합니다.
-// 이 예제에서는 직접 함수를 정의하여 사용합니다.
-
-// 상수 정의
-const SCHOOL_CODE = '7010536'; // 경덕중학교 코드 (실제 코드로 변경 필요)
-const API_KEY = 'YOUR_API_KEY'; // 실제 API 키로 변경 필요
-
 // DOM 요소
 const mealListEl = document.getElementById('meal-list');
 
@@ -20,6 +13,9 @@ function formatDate(dateString) {
 
 // 급식 메뉴 포맷팅 함수 (알레르기 정보 처리)
 function formatMenu(menuText) {
+    if (!menuText) return '';
+    
+    // 알레르기 정보는 괄호 안에 숫자로 표시됨
     return menuText
         .replace(/\([0-9.]+\)/g, '<span class="allergy">$&</span>')
         .split('<br/>').join('</li><li>');
@@ -46,6 +42,7 @@ function displayMealInfo(meals) {
                     <li>${menuItems}</li>
                 </ul>
                 <p class="calorie">칼로리: ${meal.CAL_INFO}</p>
+                <p class="origin">원산지: ${meal.ORPLC_INFO || '정보 없음'}</p>
             </div>
         `;
     });
@@ -54,45 +51,22 @@ function displayMealInfo(meals) {
 }
 
 // 급식 정보 가져오기
-async function fetchMealInfo(schoolCode, date = null) {
-    // 현재 날짜 설정
-    if (!date) {
-        const today = new Date();
-        const year = today.getFullYear();
-        const month = String(today.getMonth() + 1).padStart(2, '0');
-        const day = String(today.getDate()).padStart(2, '0');
-        date = `${year}${month}${day}`;
-    }
-
+async function fetchMealInfo(date = null) {
     try {
         mealListEl.innerHTML = '<p class="loading">급식 정보를 불러오는 중...</p>';
         
-        // NEIS 급식 API 호출
-        const url = `https://open.neis.go.kr/hub/mealServiceDietInfo` +
-                    `?KEY=${API_KEY}` +
-                    `&Type=json` +
-                    `&ATPT_OFCDC_SC_CODE=J10` +  // 경기도교육청 코드 (필요시 변경)
-                    `&SD_SCHUL_CODE=${schoolCode}` +
-                    `&MLSV_YMD=${date}`;
+        // api.js에서 정의한 함수 사용
+        // window.mealApi가 있으면 그것을 사용하고, 없으면 직접 import된 함수 사용
+        const mealApi = window.mealApi || { getMealInfo };
+        const result = await mealApi.getMealInfo(undefined, date);
         
-        const response = await fetch(url);
-        const data = await response.json();
-        
-        // API 응답 확인 및 처리
-        if (data.RESULT && data.RESULT.CODE === 'INFO-200') {
-            // 데이터가 없는 경우
-            mealListEl.innerHTML = '<p class="no-meal">해당 날짜의 급식 정보가 없습니다.</p>';
-            return;
-        }
-        
-        if (!data.mealServiceDietInfo) {
-            mealListEl.innerHTML = '<p class="error">급식 정보를 가져올 수 없습니다.</p>';
+        if (!result.success) {
+            mealListEl.innerHTML = `<p class="error">${result.message}</p>`;
             return;
         }
         
         // 급식 정보 표시
-        const meals = data.mealServiceDietInfo[1].row;
-        displayMealInfo(meals);
+        displayMealInfo(result.data);
         
     } catch (error) {
         console.error('급식 정보를 가져오는 중 오류 발생:', error);
@@ -103,9 +77,9 @@ async function fetchMealInfo(schoolCode, date = null) {
 // 페이지 로드 시 실행
 document.addEventListener('DOMContentLoaded', () => {
     // 초기 급식 정보 로드
-    fetchMealInfo(SCHOOL_CODE);
+    fetchMealInfo();
     
-    // 추가 기능: 날짜 선택기 추가
+    // 날짜 선택기 추가
     const dateSelector = document.createElement('div');
     dateSelector.className = 'date-selector';
     dateSelector.innerHTML = `
@@ -116,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // 날짜 선택기를 meal-info 섹션 위에 삽입
     const mealInfoSection = document.getElementById('meal-info');
-    mealInfoSection.insertBefore(dateSelector, mealInfoSection.firstChild);
+    mealInfoSection.insertBefore(dateSelector, mealInfoSection.firstChild.nextSibling);
     
     // 오늘 날짜를 기본값으로 설정
     const today = new Date();
@@ -129,6 +103,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('load-meal').addEventListener('click', () => {
         const datePicker = document.getElementById('date-picker');
         const selectedDate = datePicker.value.replace(/-/g, '');
-        fetchMealInfo(SCHOOL_CODE, selectedDate);
+        fetchMealInfo(selectedDate);
     });
 });

@@ -1,11 +1,14 @@
 // 급식 정보를 가져오는 API 모듈
 
-// .env 파일에서 API 키를 가져오는 대신, 직접 변수에 할당
-// 실제 배포 시에는 빌드 시스템을 통해 이 값을 교체하는 것이 좋습니다
-const API_KEY = process.env.API_KEY || 'YOUR_API_KEY';
+// API 키를 직접 입력합니다 (실제 API 키로 변경 필요)
+const API_KEY = '2ea298b3d6124c4aa24823dd777110b3';
+
+// 학교 코드와 교육청 코드 설정
+const ATPT_OFCDC_SC_CODE = 'J10'; // 경기도교육청 코드 (지역에 맞게 변경 필요)
+const SD_SCHUL_CODE = '7010536';  // 경덕중학교 코드 (실제 학교 코드로 변경 필요)
 
 // 급식 정보를 가져오는 함수
-async function getMealInfo(schoolCode, date) {
+async function getMealInfo(schoolCode = SD_SCHUL_CODE, date) {
     // 기본값 설정 (날짜가 없으면 오늘 날짜 사용)
     if (!date) {
         const today = new Date();
@@ -19,7 +22,9 @@ async function getMealInfo(schoolCode, date) {
     const url = `https://open.neis.go.kr/hub/mealServiceDietInfo` +
                 `?KEY=${API_KEY}` +
                 `&Type=json` +
-                `&ATPT_OFCDC_SC_CODE=B10` +  // 서울특별시교육청 코드 (필요시 변경)
+                `&pIndex=1` +
+                `&pSize=100` +
+                `&ATPT_OFCDC_SC_CODE=${ATPT_OFCDC_SC_CODE}` +  // 교육청 코드
                 `&SD_SCHUL_CODE=${schoolCode}` +  // 학교 코드
                 `&MLSV_YMD=${date}`;  // 날짜 (YYYYMMDD)
     
@@ -28,7 +33,7 @@ async function getMealInfo(schoolCode, date) {
         const data = await response.json();
         
         // API 응답 확인 및 처리
-        if (data.RESULT) {
+        if (data.RESULT && data.RESULT.CODE !== 'INFO-000') {
             // 에러 발생 또는 데이터 없음
             return { success: false, message: data.RESULT.MESSAGE };
         }
@@ -51,13 +56,15 @@ async function searchSchool(schoolName) {
     const url = `https://open.neis.go.kr/hub/schoolInfo` +
                 `?KEY=${API_KEY}` +
                 `&Type=json` +
+                `&pIndex=1` +
+                `&pSize=100` +
                 `&SCHUL_NM=${encodeURIComponent(schoolName)}`;
     
     try {
         const response = await fetch(url);
         const data = await response.json();
         
-        if (data.RESULT) {
+        if (data.RESULT && data.RESULT.CODE !== 'INFO-000') {
             return { success: false, message: data.RESULT.MESSAGE };
         }
         
@@ -73,4 +80,9 @@ async function searchSchool(schoolName) {
     }
 }
 
-export { getMealInfo, searchSchool };
+// 전역 객체에 함수 등록 (일반 브라우저용)
+// 모듈 내보내기 부분을 수정
+window.mealApi = {
+    getMealInfo: getMealInfo,
+    searchSchool: searchSchool
+};
