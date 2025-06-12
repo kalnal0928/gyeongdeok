@@ -1,7 +1,8 @@
 // 급식 정보를 가져오는 API 모듈
 
-// API 키를 여기에 입력하세요
-const API_KEY = 'YOUR_API_KEY';
+// .env 파일에서 API 키를 가져오는 대신, 직접 변수에 할당
+// 실제 배포 시에는 빌드 시스템을 통해 이 값을 교체하는 것이 좋습니다
+const API_KEY = process.env.API_KEY || 'YOUR_API_KEY';
 
 // 급식 정보를 가져오는 함수
 async function getMealInfo(schoolCode, date) {
