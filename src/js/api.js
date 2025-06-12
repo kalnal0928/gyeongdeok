@@ -1,7 +1,7 @@
 // 급식 정보를 가져오는 API 모듈
 
-// API 키를 직접 입력합니다 (실제 API 키로 변경 필요)
-const API_KEY = '2ea298b3d6124c4aa24823dd777110b3';
+// API 키를 환경 변수에서 가져옵니다
+const API_KEY = process.env.NEIS_API_KEY || '2ea298b3d6124c4aa24823dd777110b3';
 
 // 학교 코드와 교육청 코드 설정
 const ATPT_OFCDC_SC_CODE = 'J10'; // 경기도교육청 코드 (지역에 맞게 변경 필요)
