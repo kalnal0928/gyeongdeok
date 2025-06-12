@@ -1,7 +1,7 @@
 // 급식 정보를 가져오는 API 모듈
 
-// API 키를 환경 변수에서 가져옵니다
-const API_KEY = process.env.NEIS_API_KEY || '2ea298b3d6124c4aa24823dd777110b3';
+// API 키를 하드코딩된 값으로만 사용 (브라우저 환경)
+const API_KEY = '2ea298b3d6124c4aa24823dd777110b3';
 
 // 기본 학교 코드와 교육청 코드 설정 (선택된 학교가 없을 때 사용)
 const DEFAULT_ATPT_OFCDC_SC_CODE = 'J10'; // 경기도교육청 코드
@@ -10,6 +10,7 @@ const DEFAULT_SD_SCHUL_CODE = '7010536';  // 경덕중학교 코드
 // 급식 정보를 가져오는 함수
 async function getMealInfo(schoolCode, date) {
     // 저장된 학교 정보가 있으면 사용
+    let ATPT_OFCDC_SC_CODE;
     const savedSchool = localStorage.getItem('selectedSchool');
     if (savedSchool) {
         const { schoolCode: savedSchoolCode, eduCode } = JSON.parse(savedSchool);
