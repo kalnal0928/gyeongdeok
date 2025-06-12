@@ -8,7 +8,7 @@ const DEFAULT_ATPT_OFCDC_SC_CODE = 'J10'; // 경기도교육청 코드
 const DEFAULT_SD_SCHUL_CODE = '7010536';  // 경덕중학교 코드
 
 // 급식 정보를 가져오는 함수
-async function getMealInfo(schoolCode, date) {
+async function getMealInfo(schoolCode = DEFAULT_SD_SCHUL_CODE, date) {
     // 저장된 학교 정보가 있으면 사용
     let ATPT_OFCDC_SC_CODE;
     const savedSchool = localStorage.getItem('selectedSchool');
@@ -31,8 +31,10 @@ async function getMealInfo(schoolCode, date) {
         date = `${year}${month}${day}`;
     }
 
+    // CORS 프록시를 URL 앞에 추가
+    const corsProxy = "https://corsproxy.io/?";
     // NEIS 급식 API URL 구성
-    const url = `https://open.neis.go.kr/hub/mealServiceDietInfo` +
+    const url = `${corsProxy}https://open.neis.go.kr/hub/mealServiceDietInfo` +
                 `?KEY=${API_KEY}` +
                 `&Type=json` +
                 `&pIndex=1` +
