@@ -3,12 +3,24 @@
 // API 키를 환경 변수에서 가져옵니다
 const API_KEY = process.env.NEIS_API_KEY || '2ea298b3d6124c4aa24823dd777110b3';
 
-// 학교 코드와 교육청 코드 설정
-const ATPT_OFCDC_SC_CODE = 'J10'; // 경기도교육청 코드 (지역에 맞게 변경 필요)
-const SD_SCHUL_CODE = '7010536';  // 경덕중학교 코드 (실제 학교 코드로 변경 필요)
+// 기본 학교 코드와 교육청 코드 설정 (선택된 학교가 없을 때 사용)
+const DEFAULT_ATPT_OFCDC_SC_CODE = 'J10'; // 경기도교육청 코드
+const DEFAULT_SD_SCHUL_CODE = '7010536';  // 경덕중학교 코드
 
 // 급식 정보를 가져오는 함수
-async function getMealInfo(schoolCode = SD_SCHUL_CODE, date) {
+async function getMealInfo(schoolCode, date) {
+    // 저장된 학교 정보가 있으면 사용
+    const savedSchool = localStorage.getItem('selectedSchool');
+    if (savedSchool) {
+        const { schoolCode: savedSchoolCode, eduCode } = JSON.parse(savedSchool);
+        schoolCode = savedSchoolCode;
+        ATPT_OFCDC_SC_CODE = eduCode;
+    } else {
+        // 저장된 정보가 없으면 기본값 사용
+        schoolCode = schoolCode || DEFAULT_SD_SCHUL_CODE;
+        ATPT_OFCDC_SC_CODE = DEFAULT_ATPT_OFCDC_SC_CODE;
+    }
+
     // 기본값 설정 (날짜가 없으면 오늘 날짜 사용)
     if (!date) {
         const today = new Date();

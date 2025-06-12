@@ -2,6 +2,9 @@
 
 // DOM 요소
 const mealListEl = document.getElementById('meal-list');
+const schoolListEl = document.getElementById('school-list');
+const schoolNameInput = document.getElementById('school-name');
+const searchSchoolBtn = document.getElementById('search-school');
 
 // 날짜 포맷팅 함수
 function formatDate(dateString) {
@@ -74,10 +77,92 @@ async function fetchMealInfo(date = null) {
     }
 }
 
+// 학교 검색 결과 표시 함수
+function displaySchoolList(schools) {
+    if (!schools || schools.length === 0) {
+        schoolListEl.innerHTML = '<p class="no-school">검색된 학교가 없습니다.</p>';
+        return;
+    }
+
+    let html = '<ul class="school-list">';
+    schools.forEach(school => {
+        html += `
+            <li class="school-item">
+                <strong>${school.SCHUL_NM}</strong>
+                <p>주소: ${school.ORG_RDNMA}</p>
+                <p>학교 코드: ${school.SD_SCHUL_CODE}</p>
+                <p>교육청 코드: ${school.ATPT_OFCDC_SC_CODE}</p>
+                <button onclick="selectSchool('${school.SD_SCHUL_CODE}', '${school.ATPT_OFCDC_SC_CODE}')">
+                    이 학교 선택
+                </button>
+            </li>
+        `;
+    });
+    html += '</ul>';
+    schoolListEl.innerHTML = html;
+}
+
+// 학교 선택 함수
+function selectSchool(schoolCode, eduCode) {
+    // 선택한 학교 정보를 localStorage에 저장
+    localStorage.setItem('selectedSchool', JSON.stringify({
+        schoolCode: schoolCode,
+        eduCode: eduCode
+    }));
+    
+    // 급식 정보 새로고침
+    fetchMealInfo();
+    
+    // 선택 메시지 표시
+    alert('학교가 선택되었습니다. 급식 정보를 불러옵니다.');
+}
+
+// 학교 검색 함수
+async function searchSchoolByName() {
+    const schoolName = schoolNameInput.value.trim();
+    if (!schoolName) {
+        alert('학교명을 입력해주세요.');
+        return;
+    }
+
+    try {
+        schoolListEl.innerHTML = '<p class="loading">학교 검색 중...</p>';
+        
+        const mealApi = window.mealApi || { searchSchool };
+        const result = await mealApi.searchSchool(schoolName);
+        
+        if (!result.success) {
+            schoolListEl.innerHTML = `<p class="error">${result.message}</p>`;
+            return;
+        }
+        
+        displaySchoolList(result.data);
+        
+    } catch (error) {
+        console.error('학교 검색 중 오류 발생:', error);
+        schoolListEl.innerHTML = '<p class="error">학교 검색 중 오류가 발생했습니다.</p>';
+    }
+}
+
 // 페이지 로드 시 실행
 document.addEventListener('DOMContentLoaded', () => {
-    // 초기 급식 정보 로드
-    fetchMealInfo();
+    // 저장된 학교 정보가 있으면 불러오기
+    const savedSchool = localStorage.getItem('selectedSchool');
+    if (savedSchool) {
+        const { schoolCode, eduCode } = JSON.parse(savedSchool);
+        // 급식 정보 가져오기
+        fetchMealInfo();
+    }
+    
+    // 학교 검색 버튼 이벤트 리스너
+    searchSchoolBtn.addEventListener('click', searchSchoolByName);
+    
+    // Enter 키로도 검색 가능하도록
+    schoolNameInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            searchSchoolByName();
+        }
+    });
     
     // 날짜 선택기 추가
     const dateSelector = document.createElement('div');
