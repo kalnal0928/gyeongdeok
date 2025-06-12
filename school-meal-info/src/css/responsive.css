@@ -1,0 +1,62 @@
+@media (max-width: 1200px) {
+    /* Styles for large devices */
+}
+
+@media (max-width: 992px) {
+    /* Styles for medium devices */
+}
+
+@media (max-width: 768px) {
+    /* Styles for small devices */
+}
+
+@media (max-width: 576px) {
+    /* Styles for extra small devices */
+}
+
+/* 모바일 환경 (화면 너비 768px 미만) */
+@media (max-width: 767px) {
+    header h1 {
+        font-size: 1.5rem;
+    }
+    
+    main {
+        padding: 1rem;
+    }
+    
+    .date-selector {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .date-selector h3 {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    #date-picker {
+        width: 100%;
+    }
+    
+    #load-meal {
+        width: 100%;
+    }
+    
+    .meal-item {
+        padding: 1rem;
+    }
+}
+
+/* 태블릿 환경 (화면 너비 768px 이상 992px 미만) */
+@media (min-width: 768px) and (max-width: 991px) {
+    main {
+        padding: 1.5rem;
+    }
+}
+
+/* 데스크탑 환경 (화면 너비 992px 이상) */
+@media (min-width: 992px) {
+    .date-selector {
+        justify-content: flex-start;
+    }
+}
