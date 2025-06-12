@@ -191,3 +191,6 @@ document.addEventListener('DOMContentLoaded', () => {
         fetchMealInfo(selectedDate);
     });
 });
+
+// selectSchool을 window에 등록
+window.selectSchool = selectSchool;
