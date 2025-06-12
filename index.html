@@ -9,7 +9,7 @@
 </head>
 <body>
     <header>
-        <h1>급식 정보 제공 홈페이지</h1>
+        <h1>경덕중학교 오늘의 급식</h1>
     </header>
     <main>
         <section id="school-search">
@@ -24,6 +24,12 @@
         </section>
         <section id="meal-info">
             <h2>오늘의 급식 정보</h2>
+            <!-- 식사 시간 선택 버튼 -->
+            <div class="meal-selector">
+              <button onclick="loadMeal('LUNCH')" class="active">점심</button>
+              <button onclick="loadMeal('BREAKFAST')">아침</button>  
+              <button onclick="loadMeal('DINNER')">저녁</button>
+            </div>
             <div id="meal-list">
                 <!-- 급식 정보가 여기에 표시됩니다 -->
             </div>
@@ -34,5 +40,30 @@
     </footer>
     <script src="api.js"></script>
     <script src="app.js"></script>
+    <script>
+      // 기본적으로 페이지 로드 시 점심 정보 표시
+      document.addEventListener('DOMContentLoaded', () => {
+        loadMeal('LUNCH');
+      });
+
+      // 선택된 식사 시간에 따라 급식 정보 로드
+      function loadMeal(mealType) {
+        // 버튼 활성화 상태 변경
+        document.querySelectorAll('.meal-selector button').forEach(btn => {
+          btn.classList.remove('active');
+        });
+        event.target.classList.add('active');
+        
+        // 선택된 식사 시간에 대한 급식 정보 가져오기
+        window.mealApi.getMealInfo(undefined, undefined, window.mealApi.MEAL_CODES[mealType])
+          .then(result => {
+            if (result.success) {
+              displayMealInfo(result.data);
+            } else {
+              displayError(result.message);
+            }
+          });
+      }
+    </script>
 </body>
 </html>

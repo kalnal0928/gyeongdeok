@@ -7,8 +7,21 @@ const API_KEY = '2ea298b3d6124c4aa24823dd777110b3';
 const DEFAULT_ATPT_OFCDC_SC_CODE = 'R10'; // 경상북도 교육청 코드
 const DEFAULT_SD_SCHUL_CODE = '8791090';  // 경덕중학교 코드
 
-// 급식 정보를 가져오는 함수
-async function getMealInfo(schoolCode = DEFAULT_SD_SCHUL_CODE, date) {
+// 식사 코드 상수
+const MEAL_CODES = {
+    BREAKFAST: '1', // 아침
+    LUNCH: '2',     // 점심
+    DINNER: '3'     // 저녁
+};
+
+/**
+ * 급식 정보를 가져오는 함수
+ * @param {string} schoolCode - 학교 코드
+ * @param {string} date - 날짜 (YYYYMMDD 형식)
+ * @param {string} mealCode - 식사 코드 (1: 아침, 2: 점심, 3: 저녁)
+ * @returns {Promise<object>} - 급식 정보
+ */
+async function getMealInfo(schoolCode = DEFAULT_SD_SCHUL_CODE, date, mealCode = MEAL_CODES.LUNCH) {
     // 저장된 학교 정보가 있으면 사용
     let ATPT_OFCDC_SC_CODE;
     const savedSchool = localStorage.getItem('selectedSchool');
@@ -41,7 +54,8 @@ async function getMealInfo(schoolCode = DEFAULT_SD_SCHUL_CODE, date) {
                 `&pSize=100` +
                 `&ATPT_OFCDC_SC_CODE=${ATPT_OFCDC_SC_CODE}` +  // 교육청 코드
                 `&SD_SCHUL_CODE=${schoolCode}` +  // 학교 코드
-                `&MLSV_YMD=${date}`;  // 날짜 (YYYYMMDD)
+                `&MLSV_YMD=${date}` +  // 날짜 (YYYYMMDD)
+                `&MMEAL_SC_CODE=${mealCode}`;  // 식사 코드 (1: 아침, 2: 점심, 3: 저녁)
     
     try {
         const response = await fetch(url);
@@ -96,8 +110,8 @@ async function searchSchool(schoolName) {
 }
 
 // 전역 객체에 함수 등록 (일반 브라우저용)
-// 모듈 내보내기 부분을 수정
 window.mealApi = {
     getMealInfo: getMealInfo,
-    searchSchool: searchSchool
+    searchSchool: searchSchool,
+    MEAL_CODES: MEAL_CODES // 식사 코드 상수도 내보내기
 };
