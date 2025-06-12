@@ -9,7 +9,7 @@
 </head>
 <body>
     <header>
-        <h1>경덕중학교 오늘의 급식</h1>
+        <h1 id="school-title">경덕중학교 오늘의 급식</h1>
     </header>
     <main>
         <section id="school-search">
@@ -43,6 +43,8 @@
     <script>
       // 기본적으로 페이지 로드 시 점심 정보 표시
       document.addEventListener('DOMContentLoaded', () => {
+        // 저장된 학교 정보 확인 및 제목 업데이트
+        updateSchoolTitle();
         loadMeal('LUNCH');
       });
 
@@ -63,6 +65,39 @@
               displayError(result.message);
             }
           });
+      }
+
+      // 학교 제목 업데이트 함수
+      function updateSchoolTitle() {
+        const savedSchool = localStorage.getItem('selectedSchool');
+        if (savedSchool) {
+          const { schoolName } = JSON.parse(savedSchool);
+          document.getElementById('school-title').textContent = `${schoolName} 오늘의 급식`;
+          document.querySelector('footer p').textContent = `© ${schoolName}`;
+        }
+      }
+
+      // 새로운 학교를 선택했을 때 제목도 업데이트하는 함수
+      function selectSchool(schoolCode, eduCode, schoolName) {
+        // 학교 정보 저장
+        localStorage.setItem('selectedSchool', JSON.stringify({ 
+          schoolCode, 
+          eduCode,
+          schoolName
+        }));
+        
+        // 제목 업데이트
+        updateSchoolTitle();
+        
+        // 선택된 식사 타입으로 급식 정보 다시 로드
+        const activeButton = document.querySelector('.meal-selector button.active');
+        if (activeButton) {
+          const mealType = activeButton.textContent === '점심' ? 'LUNCH' : 
+                          activeButton.textContent === '아침' ? 'BREAKFAST' : 'DINNER';
+          loadMeal(mealType);
+        } else {
+          loadMeal('LUNCH');
+        }
       }
     </script>
 </body>
